@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClipShr - Video Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 0;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: #0066ff;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Card */
+        .card {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        /* Input */
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d4d4d4;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1a1a1a;
+            background: #ffffff;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #0066ff;
+        }
+
+        input::placeholder {
+            color: #737373;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            background: #0066ff;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #0052cc;
+        }
+
+        .btn:disabled {
+            background: #d4d4d4;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #1a1a1a;
+            border: 1px solid #e5e5e5;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e5e5e5;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #b91c1c;
+        }
+
+        /* Status */
+        .status {
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .status.success {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #86efac;
+            display: block;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            display: block;
+        }
+
+        /* Video Preview */
+        .video-preview {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            margin-bottom: 24px;
+        }
+
+        .video-thumbnail {
+            width: 180px;
+            height: 101px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #e5e5e5;
+        }
+
+        .video-info h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+        }
+
+        .video-info p {
+            font-size: 13px;
+            color: #737373;
+        }
+
+        /* Section */
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Formats Grid */
+        .formats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .format-card {
+            background: #fafafa;
+            padding: 16px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .format-card:hover {
+            border-color: #0066ff;
+        }
+
+        .format-card.selected {
+            background: #eff6ff;
+            border-color: #0066ff;
+            border-width: 2px;
+        }
+
+        .format-resolution {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .format-details {
+            font-size: 11px;
+            color: #737373;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .format-size {
+            font-size: 12px;
+            color: #525252;
+            margin-top: 4px;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .option-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #525252;
+            margin-bottom: 6px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+        }
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #0066ff;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        /* Progress */
+        .progress {
+            display: none;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .progress.active {
+            display: block;
+        }
+
+        .progress-header {
+            font-size: 14px;
+            font-weight: 500;
+            color: #525252;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: #e5e5e5;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #0066ff;
+            border-radius: 3px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .progress-stat {
+            text-align: center;
+            padding: 12px;
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+        }
+
+        .progress-stat-label {
+            font-size: 11px;
+            color: #737373;
+            text-transform: uppercase;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .progress-stat-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        /* History */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: #d4d4d4;
+        }
+
+        .history-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-filename {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .history-meta {
+            font-size: 12px;
+            color: #737373;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #737373;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .video-preview {
+                flex-direction: column;
+            }
+
+            .video-thumbnail {
+                width: 100%;
+                height: auto;
+            }
+
+            .formats-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .progress-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .history-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .history-actions {
+                width: 100%;
+            }
+
+            .btn-small {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">Clip<span>Shr</span></div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Download Section -->
+        <div class="card">
+            <div class="input-group">
+                <input type="text" id="urlInput" placeholder="Enter video URL">
+                <button class="btn" onclick="analyzeVideo()" id="analyzeBtn">Analyze</button>
+            </div>
+            <div id="status" class="status"></div>
+
+            <div id="videoPreview" class="hidden"></div>
+
+            <div id="formatsSection" class="hidden">
+                <div class="section-title">Select Quality</div>
+                <div id="formats" class="formats-grid"></div>
+
+                <div class="section-title">Options</div>
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label>Trim Start (seconds)</label>
+                        <input type="number" id="trimStart" placeholder="0" min="0">
+                    </div>
+                    <div class="option-group">
+                        <label>Trim End (seconds)</label>
+                        <input type="number" id="trimEnd" placeholder="Optional">
+                    </div>
+                    <div class="option-group">
+                        <label>Convert Format</label>
+                        <select id="convertTo">
+                            <option value="">Keep original</option>
+                            <option value="mp4">MP4</option>
+                            <option value="webm">WebM</option>
+                            <option value="mkv">MKV</option>
+                            <option value="avi">AVI</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="options-grid">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="extractAudio">
+                        <label for="extractAudio">Extract audio only (MP3)</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="compress" checked>
+                        <label for="compress">Compress video</label>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="downloadVideo()" id="downloadBtn" style="width: 100%; margin-top: 16px;">
+                    Download
+                </button>
+
+                <div id="progress" class="progress">
+                    <div class="progress-header" id="progressText">Starting...</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <div class="progress-stat">
+                            <div class="progress-stat-label">Progress</div>
+                            <div class="progress-stat-value" id="progressPercent">0%</div>
+                        </div>
+                        <div class="progress-stat">
+                            <div class="progress-stat-label">Speed</div>
+                            <div class="progress-stat-value" id="progressSpeed">-</div>
+                        </div>
+                        <div class="progress-stat">
+                            <div class="progress-stat-label">Downloaded</div>
+                            <div class="progress-stat-value" id="progressDownloaded">0 MB</div>
+                        </div>
+                        <div class="progress-stat">
+                            <div class="progress-stat-label">ETA</div>
+                            <div class="progress-stat-value" id="progressEta">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="card">
+            <div class="section-header">
+                <h3>Download History</h3>
+                <button onclick="clearHistory()" class="btn btn-secondary btn-small" id="clearHistoryBtn"
+                    style="display: none;">
+                    Clear All
+                </button>
+            </div>
+            <div id="history"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUrl = '';
+        let selectedFormat = null;
+        let progressInterval = null;
+        let downloadStartTime = null;
+
+        async function analyzeVideo() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) {
+                showStatus('Please enter a valid URL', 'error');
+                return;
+            }
+
+            currentUrl = url;
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = 'Analyzing...';
+
+            hideStatus();
+            document.getElementById('formatsSection').classList.add('hidden');
+            document.getElementById('videoPreview').classList.add('hidden');
+
+            try {
+                const res = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error);
+
+                showVideoPreview(data);
+                displayFormats(data.formats);
+                document.getElementById('formatsSection').classList.remove('hidden');
+                hideStatus();
+            } catch (err) {
+                showStatus('Error: ' + err.message, 'error');
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = 'Analyze';
+            }
+        }
+
+        function showVideoPreview(data) {
+            const preview = document.getElementById('videoPreview');
+            const duration = data.duration ?
+                Math.floor(data.duration / 60) + ':' + (Math.floor(data.duration % 60)).toString().padStart(2, '0') :
+                'Unknown';
+
+            preview.innerHTML = `
+                ${data.thumbnail ? `<img src="${data.thumbnail}" alt="Video thumbnail" class="video-thumbnail" onerror="this.style.display='none'">` : '<div class="video-thumbnail"></div>'}
+                <div class="video-info">
+                    <h3>${data.title || 'Unknown Title'}</h3>
+                    <p>Duration: ${duration}</p>
+                </div>
+            `;
+            preview.classList.remove('hidden');
+        }
+
+        function displayFormats(formats) {
+            const container = document.getElementById('formats');
+            container.innerHTML = '';
+
+            if (formats.length === 0) {
+                container.innerHTML = '<div class="empty-state">No formats available</div>';
+                return;
+            }
+
+            formats.forEach((fmt, idx) => {
+                const card = document.createElement('div');
+                card.className = 'format-card';
+                if (idx === 0) {
+                    card.classList.add('selected');
+                    selectedFormat = fmt.format_id;
+                }
+
+                const sizeDisplay = fmt.filesize ? `<div class="format-size">${fmt.filesize}</div>` : '';
+                const fpsDisplay = fmt.fps ? ` ${fmt.fps}fps` : '';
+
+                card.innerHTML = `
+                    <div class="format-resolution">${fmt.resolution}</div>
+                    <div class="format-details">${fmt.ext} ${fmt.type}${fpsDisplay}</div>
+                    ${sizeDisplay}
+                `;
+
+                card.onclick = () => {
+                    document.querySelectorAll('.format-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedFormat = fmt.format_id;
+                };
+
+                container.appendChild(card);
+            });
+        }
+
+        async function downloadVideo() {
+            if (!selectedFormat) {
+                showStatus('Please select a format', 'error');
+                return;
+            }
+
+            const data = {
+                url: currentUrl,
+                format_id: selectedFormat,
+                trim_start: document.getElementById('trimStart').value || null,
+                trim_end: document.getElementById('trimEnd').value || null,
+                convert_to: document.getElementById('convertTo').value || null,
+                extract_audio: document.getElementById('extractAudio').checked,
+                compress: document.getElementById('compress').checked
+            };
+
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.disabled = true;
+
+            showProgress(true);
+            hideStatus();
+            downloadStartTime = Date.now();
+
+            try {
+                const downloadPromise = fetch('/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                let downloadId = Date.now().toString();
+                pollProgressContinuously(downloadId);
+
+                const res = await downloadPromise;
+                const result = await res.json();
+
+                if (!res.ok) throw new Error(result.error);
+
+                if (result.download_id) {
+                    downloadId = result.download_id;
+                }
+
+                await waitForCompletion(downloadId);
+
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+
+                showProgress(false);
+                showStatus(`Successfully downloaded: ${result.filename} (${result.size})`, 'success');
+                loadHistory();
+
+                setTimeout(() => {
+                    document.getElementById('urlInput').value = '';
+                    document.getElementById('formatsSection').classList.add('hidden');
+                    document.getElementById('videoPreview').classList.add('hidden');
+                    document.getElementById('trimStart').value = '';
+                    document.getElementById('trimEnd').value = '';
+                    document.getElementById('convertTo').value = '';
+                    document.getElementById('extractAudio').checked = false;
+                    hideStatus();
+                }, 5000);
+            } catch (err) {
+                showProgress(false);
+                showStatus('Download failed: ' + err.message, 'error');
+            } finally {
+                downloadBtn.disabled = false;
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+            }
+        }
+
+        function pollProgressContinuously(downloadId) {
+            if (progressInterval) clearInterval(progressInterval);
+
+            let simulatedProgress = 0;
+
+            progressInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/progress/${downloadId}`);
+                    if (res.ok) {
+                        const progress = await res.json();
+                        if (progress.status !== 'unknown') {
+                            updateProgressUI(progress);
+                            return;
+                        }
+                    }
+
+                    simulatedProgress = Math.min(simulatedProgress + Math.random() * 3, 90);
+                    const elapsed = Math.floor((Date.now() - downloadStartTime) / 1000);
+                    updateProgressUI({
+                        status: 'downloading',
+                        percent: simulatedProgress,
+                        speed: '...',
+                        eta: elapsed + 's',
+                        downloaded: '...'
+                    });
+                } catch (err) {
+                    console.error('Progress polling error:', err);
+                }
+            }, 500);
+        }
+
+        function updateProgressUI(progress) {
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressSpeed = document.getElementById('progressSpeed');
+            const progressEta = document.getElementById('progressEta');
+            const progressText = document.getElementById('progressText');
+            const progressDownloaded = document.getElementById('progressDownloaded');
+
+            if (progress.status === 'downloading') {
+                progressText.textContent = 'Downloading...';
+                progressBar.style.width = progress.percent + '%';
+                progressPercent.textContent = progress.percent.toFixed(1) + '%';
+                progressSpeed.textContent = progress.speed || '-';
+                progressEta.textContent = progress.eta || '-';
+                progressDownloaded.textContent = progress.downloaded || '-';
+            } else if (progress.status === 'processing' || progress.status === 'post-processing') {
+                progressText.textContent = 'Processing...';
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+                progressSpeed.textContent = '-';
+                progressEta.textContent = 'Almost done';
+                progressDownloaded.textContent = progress.total || '-';
+            } else if (progress.status === 'compressing') {
+                progressText.textContent = 'Compressing...';
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+                progressSpeed.textContent = '-';
+                progressEta.textContent = 'Compressing';
+                progressDownloaded.textContent = progress.total || '-';
+            } else if (progress.status === 'complete') {
+                progressText.textContent = 'Complete!';
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+                progressSpeed.textContent = '-';
+                progressEta.textContent = 'Done';
+                progressDownloaded.textContent = progress.total || '-';
+            }
+        }
+
+        async function waitForCompletion(downloadId) {
+            return new Promise((resolve) => {
+                const maxWaitTime = 600000;
+                const startTime = Date.now();
+
+                const checkInterval = setInterval(async () => {
+                    try {
+                        if (Date.now() - startTime > maxWaitTime) {
+                            clearInterval(checkInterval);
+                            resolve();
+                            return;
+                        }
+
+                        const res = await fetch(`/progress/${downloadId}`);
+                        if (res.ok) {
+                            const progress = await res.json();
+
+                            if (progress.status === 'complete' || progress.status === 'error') {
+                                clearInterval(checkInterval);
+                                resolve();
+                            }
+                        }
+                    } catch (err) {
+                        // Ignore errors
+                    }
+                }, 1000);
+
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    resolve();
+                }, 300000);
+            });
+        }
+
+        function showProgress(show) {
+            const progress = document.getElementById('progress');
+            if (show) {
+                progress.classList.add('active');
+                document.getElementById('progressBar').style.width = '0%';
+                document.getElementById('progressPercent').textContent = '0%';
+                document.getElementById('progressSpeed').textContent = '-';
+                document.getElementById('progressEta').textContent = '-';
+                document.getElementById('progressDownloaded').textContent = '-';
+                document.getElementById('progressText').textContent = 'Starting...';
+            } else {
+                progress.classList.remove('active');
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        function hideStatus() {
+            document.getElementById('status').className = 'status';
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch('/history');
+                const data = await res.json();
+
+                const container = document.getElementById('history');
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No downloads yet</div>';
+                    document.getElementById('clearHistoryBtn').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('clearHistoryBtn').style.display = 'block';
+
+                container.innerHTML = data.reverse().map((item, index) => `
+                    <div class="history-item">
+                        <div class="history-info">
+                            <div class="history-filename">${item.filename}</div>
+                            <div class="history-meta">${item.size || 'Unknown size'} • ${item.type} • ${item.timestamp}</div>
+                        </div>
+                        <div class="history-actions">
+                            <a href="/media/${item.filename}" download class="btn btn-small">Download</a>
+                            <button onclick="deleteHistoryItem(${data.length - 1 - index}, '${item.filename}')" class="btn btn-danger btn-small">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load history:', err);
+            }
+        }
+
+        async function deleteHistoryItem(index, filename) {
+            if (!confirm(`Delete ${filename}?`)) return;
+
+            try {
+                const res = await fetch('/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+
+                const result = await res.json();
+
+                if (!res.ok) throw new Error(result.error);
+
+                showStatus('File deleted successfully', 'success');
+                setTimeout(hideStatus, 3000);
+                loadHistory();
+            } catch (err) {
+                showStatus('Error: ' + err.message, 'error');
+            }
+        }
+
+        async function clearHistory() {
+            if (!confirm('Clear all history and delete all files? This cannot be undone!')) return;
+
+            try {
+                const res = await fetch('/clear-history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await res.json();
+
+                if (!res.ok) throw new Error(result.error);
+
+                showStatus('History cleared successfully', 'success');
+                setTimeout(hideStatus, 3000);
+                loadHistory();
+            } catch (err) {
+                showStatus('Error: ' + err.message, 'error');
+            }
+        }
+
+        document.getElementById('urlInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                analyzeVideo();
+            }
+        });
+
+        loadHistory();
+    </script>
+</body>
+
+</html>
